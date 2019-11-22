@@ -1,72 +1,52 @@
 var socket = io();
 
-var params = new URLSearchParams( window.location.search );
+var params = new URLSearchParams(window.location.search);
 
-if( !params.has('nombre') || !params.has('sala') ){
+if (!params.has('nombre') || !params.has('sala')) {
     window.location = 'index.html';
-    throw new Error('El nombre es necesario y la sala');
+    throw new Error('El nombre y sala son necesarios');
 }
 
 var usuario = {
     nombre: params.get('nombre'),
     sala: params.get('sala')
-}
+};
+
+
 
 socket.on('connect', function() {
     console.log('Conectado al servidor');
 
     socket.emit('entrarChat', usuario, function(resp) {
-        console.log('Usuarios conectados ', resp);
-    })
+        renderizarUsuarios(resp);
+    });
+
 });
 
-//Mensajes privados
-socket.on('mensajePrivado', function(mensaje){
-    console.log('mensajePrivado:', mensaje);
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// escuchar
+// Escucha cuando se pierde la conexion
 socket.on('disconnect', function() {
 
     console.log('Perdimos conexión con el servidor');
 
 });
 
-
-// // Enviar información
-// socket.emit('crearMensaje', {
-//     usuario: 'Fernando',
-//     mensaje: 'Hola Mundo'
-// }, function(resp) {
-//     console.log('respuesta server: ', resp);
-// });
-
-// Escuchar información
+// Escucha los mensaje enviados
 socket.on('crearMensaje', function(mensaje) {
-
-    console.log('Servidor:', mensaje);
-
+    renderizarMensajes(mensaje, false);
+    scrollBottom();
 });
 
-// mostrar lista personas
-socket.on('listPersona', function(personas) {
 
-    console.log(personas);
-
+// Escucha mensajes privados
+socket.on('mensajePrivado', function(mensaje) {
+    
+    console.log('Mensaje Privado:', mensaje);
+    
 });
+
+
+
+// Escucha la lista actual de las salas
+// socket.on('listaPersona', function(personas) {
+//     console.log(personas);
+// });
